@@ -17,4 +17,5 @@ return [
     '_profiler_exception_css' => [['token'], ['_controller' => 'web_profiler.controller.exception::cssAction'], [], [['text', '/exception.css'], ['variable', '/', '[^/]++', 'token', true], ['text', '/_profiler']], [], []],
     'systeme' => [[], ['_controller' => 'App\\Controller\\SystemeController::index'], [], [['text', '/systeme']], [], []],
     'addusersysteme' => [[], ['_controller' => 'App\\Controller\\SystemeController::addusersystem'], [], [['text', '/addusersysteme']], [], []],
+    'login' => [[], ['_controller' => 'App\\Controller\\SystemeController::login'], [], [['text', '/login']], [], []],
 ];

@@ -15,6 +15,7 @@ return [
         '/_profiler/open' => [[['_route' => '_profiler_open_file', '_controller' => 'web_profiler.controller.profiler::openAction'], null, null, null, false, false, null]],
         '/systeme' => [[['_route' => 'systeme', '_controller' => 'App\\Controller\\SystemeController::index'], null, null, null, false, false, null]],
         '/addusersysteme' => [[['_route' => 'addusersysteme', '_controller' => 'App\\Controller\\SystemeController::addusersystem'], null, ['POST' => 0], null, false, false, null]],
+        '/login' => [[['_route' => 'login', '_controller' => 'App\\Controller\\SystemeController::login'], null, ['POST' => 0], null, false, false, null]],
     ],
     [ // $regexpList
         0 => '{^(?'
