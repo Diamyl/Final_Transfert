@@ -80,6 +80,11 @@ class User implements UserInterface
      */
     private $comptes;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $profil;
+
     public function __construct()
     {
         $this->depots = new ArrayCollection();
@@ -306,6 +311,18 @@ class User implements UserInterface
                 $compte->setCreateur(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getProfil(): ?string
+    {
+        return $this->profil;
+    }
+
+    public function setProfil(string $profil): self
+    {
+        $this->profil = $profil;
 
         return $this;
     }
