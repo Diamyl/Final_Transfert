@@ -34,11 +34,11 @@ class SystemeController extends AbstractController
         $user = new User();
         $form = $this->createForm(UserFormType::class, $user); //les champs du formulaire
         $datapostman = $request->request->all(); // recupérer les données saisies sur postman
-        $form->submit($datapostman); // mettre les données saisies de postman sur le formulaire
-        $password = $datapostman['password']; // recuperation de ts les données du tableau datapostman dont le password
+        $form->submit($datapostman); // mettre les données saisies de postman dans le formulaire
+        $password = $datapostman['password']; // recuperation du password à partir des données saisies sur postman
         $encodpassword = $passwordEncoder->encodePassword($user,$password); // encodage du password aprés recupération des données du user
         $user->setPassword($encodpassword); // Repasser le password
-        $profil = $datapostman['profil'];
+        $profil = $datapostman['profil']; // recuperation du profil à partir des données saisies sur postman
 
         if($profil==1){
             $user->setRoles(["ROLE_SUPERADMIN"]); // le champs Role
@@ -74,21 +74,23 @@ class SystemeController extends AbstractController
     public function login(Request $request, UserPasswordEncoderInterface $passwordEncoder,  JWTEncoderInterface $JWTEncoder)
     {
         $datapostman = $request->request->all();
-        $email = $datapostman['email'];
+        $email = $datapostman['username'];
         $password = $datapostman['password'];
-        $repository = $this->getDoctrine()->getRepository(User::class);
-        $comparemail = $repository->findOneBy(['email' => $email]); // comparer l'email saisi avec l'emailse trouvant dans la database
+        $repository = $this->getDoctrine()->getRepository(User::class); // Recupération des methodes du repository
+        $comparemail = $repository->findOneBy(['email' => $email]); // recherche sur la table une ligne contenant uu info unique comparer avec l'email se trouvant dans la database
        
         if($comparemail==true){
             $comparpassword = $passwordEncoder->isPasswordValid($comparemail, $password);
             if($comparpassword){
 
+            //---------Obtention du token-------------//
                 $token = $JWTEncoder->encode([
-                    'email' => $comparemail->getEmail(),
+                    'username' => $comparemail->getEmail(), //encodage de l'email
                     'exp' => time() + 3600 // 1 hour expiration
                 ]);
 
                 return new JsonResponse(['token' => $token]);
+            //---------Fin Obtention du token-------------//
             }
 
             else{
@@ -115,7 +117,5 @@ class SystemeController extends AbstractController
 
             return new JsonResponse($data, 201);
         }
-
-
     }
 }

@@ -13,6 +13,7 @@ return [
         '/_profiler/search_bar' => [[['_route' => '_profiler_search_bar', '_controller' => 'web_profiler.controller.profiler::searchBarAction'], null, null, null, false, false, null]],
         '/_profiler/phpinfo' => [[['_route' => '_profiler_phpinfo', '_controller' => 'web_profiler.controller.profiler::phpinfoAction'], null, null, null, false, false, null]],
         '/_profiler/open' => [[['_route' => '_profiler_open_file', '_controller' => 'web_profiler.controller.profiler::openAction'], null, null, null, false, false, null]],
+        '/partenaire/addpartenaire' => [[['_route' => 'partenaireaddpartenaire', '_controller' => 'App\\Controller\\PartenaireController::addpartenaire'], null, ['POST' => 0], null, false, false, null]],
         '/systeme' => [[['_route' => 'systeme', '_controller' => 'App\\Controller\\SystemeController::index'], null, null, null, false, false, null]],
         '/addusersysteme' => [[['_route' => 'addusersysteme', '_controller' => 'App\\Controller\\SystemeController::addusersystem'], null, ['POST' => 0], null, false, false, null]],
         '/login' => [[['_route' => 'login', '_controller' => 'App\\Controller\\SystemeController::login'], null, ['POST' => 0], null, false, false, null]],
