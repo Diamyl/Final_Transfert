@@ -47,14 +47,20 @@ class TransactionController extends AbstractController
         $depot->setCaissier($caissier);
         $montant = $depot->getMontant(); // permet d'obtenir le montant saisi sur postman
         if($montant < 75000){
+            
             $data = [
                 'Status' => 403,
-                'Message' => 'Le montant doit être supérieur à 75 000'
+                'Message' => 'Le montant doit être supérieur ou égale à 75 000'
             ];
             return new JsonResponse($data, 201);
         }
 
+        $compte = $depot->getCompte(); // obtention de ts les infos de la table compte
+        $solde = $compte->getMontant(); // obtentention du montant du compte
+        $compte->setMontant($solde + $montant);
+
         $entityManager->persist($depot); // mapping
+        $entityManager->persist($compte); // mapping
         $entityManager->flush(); // insertion dans la database
 
         $data = [
