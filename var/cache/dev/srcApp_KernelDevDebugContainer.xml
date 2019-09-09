@@ -337,7 +337,17 @@
         <argument type="service" id=".service_locator.CDOTD6..App\Controller\SystemeController"/>
       </call>
     </service>
+    <service id="App\Controller\TransactionController" class="App\Controller\TransactionController" public="true" autowire="true" autoconfigure="true">
+      <tag name="controller.service_arguments"/>
+      <tag name="container.service_subscriber"/>
+      <call method="setContainer">
+        <argument type="service" id=".service_locator.CDOTD6..App\Controller\TransactionController"/>
+      </call>
+    </service>
     <service id="App\Form\CompteFormType" class="App\Form\CompteFormType" autowire="true" autoconfigure="true">
+      <tag name="form.type"/>
+    </service>
+    <service id="App\Form\DepotFormType" class="App\Form\DepotFormType" autowire="true" autoconfigure="true">
       <tag name="form.type"/>
     </service>
     <service id="App\Form\PartenaireFormType" class="App\Form\PartenaireFormType" autowire="true" autoconfigure="true">
@@ -636,6 +646,7 @@
       </argument>
       <argument type="collection">
         <argument>App\Form\CompteFormType</argument>
+        <argument>App\Form\DepotFormType</argument>
         <argument>App\Form\PartenaireFormType</argument>
         <argument>App\Form\UserFormType</argument>
         <argument>Symfony\Component\Form\Extension\Core\Type\FormType</argument>
@@ -896,7 +907,7 @@
       <argument type="service" id="form.registry"/>
     </service>
     <service id="form.extension" class="Symfony\Component\Form\Extension\DependencyInjection\DependencyInjectionExtension" public="false">
-      <argument type="service" id=".service_locator.B6LGGjc"/>
+      <argument type="service" id=".service_locator.1YmRqAP"/>
       <argument type="collection">
         <argument key="Symfony\Component\Form\Extension\Core\Type\FormType" type="iterator">
           <argument type="service" id="form.type_extension.form.transformation_failure_handling"/>
@@ -2739,6 +2750,7 @@
     <service id="security.authentication.manager" class="Symfony\Component\Security\Core\Authentication\AuthenticationProviderManager" public="false">
       <argument type="iterator">
         <argument type="service" id="security.authentication.provider.guard.partenaire"/>
+        <argument type="service" id="security.authentication.provider.guard.transaction"/>
       </argument>
       <argument>true</argument>
       <call method="setEventDispatcher">
@@ -2789,10 +2801,11 @@
       <argument type="service" id="security.authentication.trust_resolver"/>
     </service>
     <service id="security.firewall.map" class="Symfony\Bundle\SecurityBundle\Security\FirewallMap" public="false">
-      <argument type="service" id=".service_locator.P5mcdBI"/>
+      <argument type="service" id=".service_locator.ewA1KzA"/>
       <argument type="iterator">
         <argument key="security.firewall.map.context.dev" type="service" id=".security.request_matcher.Iy.T22O"/>
         <argument key="security.firewall.map.context.partenaire" type="service" id=".security.request_matcher.ajVM3Il"/>
+        <argument key="security.firewall.map.context.transaction" type="service" id=".security.request_matcher.SlPW96B"/>
       </argument>
     </service>
     <service id="security.firewall.context" class="Symfony\Bundle\SecurityBundle\Security\FirewallContext" public="false" abstract="true">
@@ -3142,6 +3155,7 @@
       <argument type="service" id="debug.event_dispatcher" on-invalid="null"/>
       <argument type="collection">
         <argument>partenaire</argument>
+        <argument>transaction</argument>
       </argument>
       <call method="setSessionAuthenticationStrategy">
         <argument type="service" id="security.authentication.session_strategy"/>
@@ -3264,11 +3278,70 @@
       <argument>null</argument>
       <argument type="service" id="security.firewall.map.config.partenaire"/>
     </service>
-    <service id=".service_locator.P5mcdBI" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
+    <service id="security.firewall.map.config.transaction" class="Symfony\Bundle\SecurityBundle\Security\FirewallConfig" public="false">
+      <argument>transaction</argument>
+      <argument>security.user_checker</argument>
+      <argument>.security.request_matcher.SlPW96B</argument>
+      <argument>true</argument>
+      <argument>true</argument>
+      <argument>security.user.provider.concrete.app_user_provider</argument>
+      <argument>null</argument>
+      <argument>lexik_jwt_authentication.jwt_token_authenticator</argument>
+      <argument>null</argument>
+      <argument>null</argument>
+      <argument type="collection">
+        <argument>guard</argument>
+      </argument>
+      <argument>null</argument>
+    </service>
+    <service id=".security.request_matcher.SlPW96B" class="Symfony\Component\HttpFoundation\RequestMatcher" public="false">
+      <argument>^/transaction</argument>
+    </service>
+    <service id="security.authentication.provider.guard.transaction" class="Symfony\Component\Security\Guard\Provider\GuardAuthenticationProvider" public="false">
+      <argument type="iterator">
+        <argument type="service" id="lexik_jwt_authentication.security.guard.jwt_token_authenticator"/>
+      </argument>
+      <argument type="service" id="security.user.provider.concrete.app_user_provider"/>
+      <argument>transaction</argument>
+      <argument type="service" id="security.user_checker"/>
+    </service>
+    <service id="security.authentication.listener.guard.transaction" class="Symfony\Component\Security\Guard\Firewall\GuardAuthenticationListener" public="false">
+      <tag name="security.remember_me_aware" id="transaction" provider="security.user.provider.concrete.app_user_provider"/>
+      <argument type="service" id="security.authentication.guard_handler"/>
+      <argument type="service" id="security.authentication.manager"/>
+      <argument>transaction</argument>
+      <argument type="iterator">
+        <argument type="service" id="lexik_jwt_authentication.security.guard.jwt_token_authenticator"/>
+      </argument>
+      <argument type="service" id="logger" on-invalid="null"/>
+    </service>
+    <service id="security.exception_listener.transaction" class="Symfony\Component\Security\Http\Firewall\ExceptionListener" public="false">
+      <argument type="service" id="security.token_storage"/>
+      <argument type="service" id="security.authentication.trust_resolver"/>
+      <argument type="service" id="security.http_utils"/>
+      <argument>transaction</argument>
+      <argument type="service" id="lexik_jwt_authentication.security.guard.jwt_token_authenticator"/>
+      <argument>null</argument>
+      <argument>null</argument>
+      <argument type="service" id="logger" on-invalid="null"/>
+      <argument>true</argument>
+    </service>
+    <service id="security.firewall.map.context.transaction" class="Symfony\Bundle\SecurityBundle\Security\FirewallContext" public="false">
+      <argument type="iterator">
+        <argument type="service" id="security.channel_listener"/>
+        <argument type="service" id="security.authentication.listener.guard.transaction"/>
+        <argument type="service" id="security.access_listener"/>
+      </argument>
+      <argument type="service" id="security.exception_listener.transaction"/>
+      <argument>null</argument>
+      <argument type="service" id="security.firewall.map.config.transaction"/>
+    </service>
+    <service id=".service_locator.ewA1KzA" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="security.firewall.map.context.dev" type="service" id="security.firewall.map.context.dev"/>
         <argument key="security.firewall.map.context.partenaire" type="service" id="security.firewall.map.context.partenaire"/>
+        <argument key="security.firewall.map.context.transaction" type="service" id="security.firewall.map.context.transaction"/>
       </argument>
     </service>
     <service id="security.command.user_password_encoder" class="Symfony\Bundle\SecurityBundle\Command\UserPasswordEncoderCommand" public="false">
@@ -3486,8 +3559,13 @@
     <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\SystemeController" class="App\Controller\SystemeController" autowire="true" abstract="true"/>
     <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\SystemeController" class="App\Controller\SystemeController" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Controller\SystemeController" class="App\Controller\SystemeController" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Contracts\Service\ServiceSubscriberInterface.0.App\Controller\TransactionController" class="App\Controller\TransactionController" autowire="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Bundle\FrameworkBundle\Controller\AbstractController.0.App\Controller\TransactionController" class="App\Controller\TransactionController" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Controller\TransactionController" class="App\Controller\TransactionController" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\CompteFormType" class="App\Form\CompteFormType" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Form\CompteFormType" class="App\Form\CompteFormType" autowire="true" autoconfigure="true" abstract="true"/>
+    <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\DepotFormType" class="App\Form\DepotFormType" autowire="true" abstract="true"/>
+    <service id=".abstract.instanceof.App\Form\DepotFormType" class="App\Form\DepotFormType" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\PartenaireFormType" class="App\Form\PartenaireFormType" autowire="true" abstract="true"/>
     <service id=".abstract.instanceof.App\Form\PartenaireFormType" class="App\Form\PartenaireFormType" autowire="true" autoconfigure="true" abstract="true"/>
     <service id=".instanceof.Symfony\Component\Form\FormTypeInterface.0.App\Form\UserFormType" class="App\Form\UserFormType" autowire="true" abstract="true"/>
@@ -3679,15 +3757,27 @@
         <argument key="passwordEncoder" type="service" id="security.user_password_encoder.generic"/>
       </argument>
     </service>
-    <service id=".service_locator.UNhqM70" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
+    <service id=".service_locator.a1uNCVl" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
+      <tag name="container.service_locator"/>
+      <argument type="collection">
+        <argument key="entityManager" type="service" id="doctrine.orm.default_entity_manager"/>
+        <argument key="serializer" type="service" id="serializer"/>
+        <argument key="userRepository" type="service" id="App\Repository\UserRepository"/>
+      </argument>
+    </service>
+    <service id=".service_locator.9Qx2Tgt" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Controller\PartenaireController::addpartenaire" type="service" id=".service_locator.9cYN13S"/>
+        <argument key="App\Controller\PartenaireController::adduserpartenaire" type="service" id=".service_locator.9cYN13S"/>
         <argument key="App\Controller\SystemeController::addusersystem" type="service" id=".service_locator.9cYN13S"/>
         <argument key="App\Controller\SystemeController::login" type="service" id=".service_locator.yLBQTW1"/>
+        <argument key="App\Controller\TransactionController::depot" type="service" id=".service_locator.a1uNCVl"/>
         <argument key="App\Controller\PartenaireController:addpartenaire" type="service" id=".service_locator.9cYN13S"/>
+        <argument key="App\Controller\PartenaireController:adduserpartenaire" type="service" id=".service_locator.9cYN13S"/>
         <argument key="App\Controller\SystemeController:addusersystem" type="service" id=".service_locator.9cYN13S"/>
         <argument key="App\Controller\SystemeController:login" type="service" id=".service_locator.yLBQTW1"/>
+        <argument key="App\Controller\TransactionController:depot" type="service" id=".service_locator.a1uNCVl"/>
       </argument>
     </service>
     <service id=".service_locator.gmwRZ3h" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
@@ -3736,10 +3826,11 @@
       <argument type="service" id="debug.argument_resolver.not_tagged_controller.inner"/>
       <argument type="service" id="debug.stopwatch"/>
     </service>
-    <service id=".service_locator.B6LGGjc" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
+    <service id=".service_locator.1YmRqAP" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
       <tag name="container.service_locator"/>
       <argument type="collection">
         <argument key="App\Form\CompteFormType" type="service" id="App\Form\CompteFormType"/>
+        <argument key="App\Form\DepotFormType" type="service" id="App\Form\DepotFormType"/>
         <argument key="App\Form\PartenaireFormType" type="service" id="App\Form\PartenaireFormType"/>
         <argument key="App\Form\UserFormType" type="service" id="App\Form\UserFormType"/>
         <argument key="Symfony\Bridge\Doctrine\Form\Type\EntityType" type="service" id="form.type.entity"/>
@@ -3802,6 +3893,12 @@
     <service id=".service_locator.CDOTD6..App\Controller\SystemeController" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
       <tag name="container.service_locator_context" id="App\Controller\SystemeController"/>
       <argument>App\Controller\SystemeController</argument>
+      <argument type="service" id="service_container"/>
+      <factory service=".service_locator.CDOTD6." method="withContext"/>
+    </service>
+    <service id=".service_locator.CDOTD6..App\Controller\TransactionController" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
+      <tag name="container.service_locator_context" id="App\Controller\TransactionController"/>
+      <argument>App\Controller\TransactionController</argument>
       <argument type="service" id="service_container"/>
       <factory service=".service_locator.CDOTD6." method="withContext"/>
     </service>
@@ -3882,12 +3979,12 @@
       <argument type="service" id="security.token_storage"/>
     </service>
     <service id="debug.argument_resolver.service.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\ServiceValueResolver" public="false">
-      <argument type="service" id=".service_locator.UNhqM70"/>
+      <argument type="service" id=".service_locator.9Qx2Tgt"/>
     </service>
     <service id="debug.argument_resolver.default.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\DefaultValueResolver" public="false"/>
     <service id="debug.argument_resolver.variadic.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\VariadicValueResolver" public="false"/>
     <service id="debug.argument_resolver.not_tagged_controller.inner" class="Symfony\Component\HttpKernel\Controller\ArgumentResolver\NotTaggedControllerValueResolver" public="false">
-      <argument type="service" id=".service_locator.UNhqM70"/>
+      <argument type="service" id=".service_locator.9Qx2Tgt"/>
     </service>
     <service id=".service_locator.UwRI0uT" class="Symfony\Component\DependencyInjection\ServiceLocator" public="false">
       <tag name="container.service_locator"/>
@@ -4221,6 +4318,8 @@
     <service id="Symfony\Component\Security\Core\User\UserProviderInterface" alias="security.user.provider.concrete.app_user_provider"/>
     <service id="security.authentication.session_strategy.partenaire" alias="security.authentication.session_strategy_noop"/>
     <service id="security.user_checker.partenaire" alias="security.user_checker" public="false"/>
+    <service id="security.authentication.session_strategy.transaction" alias="security.authentication.session_strategy_noop"/>
+    <service id="security.user_checker.transaction" alias="security.user_checker" public="false"/>
     <service id="Symfony\Component\Security\Core\User\UserCheckerInterface" alias="security.user_checker" public="false"/>
     <service id="Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenInterface" alias="lexik_jwt_authentication.jwt_manager"/>
     <service id="Lexik\Bundle\JWTAuthenticationBundle\Services\JWTTokenManagerInterface" alias="lexik_jwt_authentication.jwt_manager"/>
@@ -4232,7 +4331,7 @@
     <service id="lexik_jwt_authentication.encoder" alias="lexik_jwt_authentication.encoder.lcobucci" public="true"/>
     <service id="Lexik\Bundle\JWTAuthenticationBundle\Encoder\JWTEncoderInterface" alias="lexik_jwt_authentication.encoder.lcobucci"/>
     <service id="lexik_jwt_authentication.key_loader" alias="lexik_jwt_authentication.key_loader.raw" public="true"/>
-    <service id="argument_resolver.controller_locator" alias=".service_locator.UNhqM70"/>
+    <service id="argument_resolver.controller_locator" alias=".service_locator.9Qx2Tgt"/>
     <service id="twig.loader.filesystem" alias="twig.loader.native_filesystem" public="false"/>
     <service id="twig.loader" alias="twig.loader.native_filesystem"/>
     <service id="Psr\Log\LoggerInterface" alias="logger" public="false"/>

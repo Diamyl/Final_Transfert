@@ -16,7 +16,10 @@ return [
     '_profiler_exception' => [['token'], ['_controller' => 'web_profiler.controller.exception::showAction'], [], [['text', '/exception'], ['variable', '/', '[^/]++', 'token', true], ['text', '/_profiler']], [], []],
     '_profiler_exception_css' => [['token'], ['_controller' => 'web_profiler.controller.exception::cssAction'], [], [['text', '/exception.css'], ['variable', '/', '[^/]++', 'token', true], ['text', '/_profiler']], [], []],
     'partenaireaddpartenaire' => [[], ['_controller' => 'App\\Controller\\PartenaireController::addpartenaire'], [], [['text', '/partenaire/addpartenaire']], [], []],
+    'partenaireadduserpartenaire' => [[], ['_controller' => 'App\\Controller\\PartenaireController::adduserpartenaire'], [], [['text', '/partenaire/adduserpartenaire']], [], []],
     'systeme' => [[], ['_controller' => 'App\\Controller\\SystemeController::index'], [], [['text', '/systeme']], [], []],
     'addusersysteme' => [[], ['_controller' => 'App\\Controller\\SystemeController::addusersystem'], [], [['text', '/addusersysteme']], [], []],
     'login' => [[], ['_controller' => 'App\\Controller\\SystemeController::login'], [], [['text', '/login']], [], []],
+    'transactiontransaction' => [[], ['_controller' => 'App\\Controller\\TransactionController::index'], [], [['text', '/transaction/transaction']], [], []],
+    'transactiondepot' => [[], ['_controller' => 'App\\Controller\\TransactionController::depot'], [], [['text', '/transaction/depot']], [], []],
 ];

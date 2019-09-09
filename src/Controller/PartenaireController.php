@@ -30,7 +30,7 @@ class PartenaireController extends AbstractController
         $a = $this->getUser();
         $idcreateur= $a->getId();  
         $createur=$this->getDoctrine()->getRepository(User::class)->find($idcreateur); // transformer idcreateur en objet
-
+        
         $partenaire = new Partenaire();
         $partenaire->setStatus('Actif');
         $form = $this->createForm(PartenaireFormType::class, $partenaire); //les champs du formulaire
@@ -43,8 +43,8 @@ class PartenaireController extends AbstractController
         $password = $datapostman['password']; // recuperation du password à partir des données saisies sur postman
         $encodpassword = $passwordEncoder->encodePassword($user, $password); // encodage du password aprés recupération des données du user
         $user->setPassword($encodpassword); // Repasser le password
-        $user->setRoles(["ROLE_ADMIN_PARTENAIRE"]);
-        $user->setProfil('ADMIN PARTENAIRE');
+        $user->setRoles(["ROLE_SUPER_ADMIN_PARTENAIRE"]);
+        $user->setProfil('SUPER ADMIN PARTENAIRE');
         $user->setStatus('Actif');
         $user->setPartenaire($partenaire); // id du partenaire pour le user
 
@@ -67,6 +67,48 @@ class PartenaireController extends AbstractController
         ]);
     }
 
-        
-   
+    /**
+     * @Route("/adduserpartenaire", name="adduserpartenaire", methods={"POST"})
+     */
+    public function adduserpartenaire(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, SerializerInterface $serializer)
+    {
+        $a = $this->getUser()->getPartenaire()->getId(); //recuperation de l'id du partenaire de l'admin qui s'est connecté
+        $partenaire = $this->getDoctrine()->getRepository(Partenaire::class)->find($a); // transformer idcreateur en objet
+
+        $user = new User();
+        $form = $this->createForm(UserFormType::class, $user); //les champs du formulaire
+        $datapostman = $request->request->all(); // recupérer les données saisies sur postman
+        $form->submit($datapostman); // mettre les données saisies de postman dans le formulaire
+        $password = $datapostman['password']; // recuperation du password à partir des données saisies sur postman
+        $encodpassword = $passwordEncoder->encodePassword($user, $password); // encodage du password aprés recupération des données du user
+        $user->setPassword($encodpassword); // Repasser le password 
+        $user->setStatus('Actif');
+        $user->setPartenaire($partenaire);
+        $profil = $datapostman['profil']; // recuperation du profil à partir des données saisies sur postman
+
+        if ($profil == 1) {
+            $user->setRoles(["ROLE_ADMIN_PARTENAIRE"]); // le champs Role
+            $user->setProfil('ADMIN PARTENAIRE'); // le champs profil
+
+            $data = [
+                'Status' => 201,
+                'Message' => 'Admin Partenaire créé'
+            ];
+        } 
+
+        else {
+            $user->setRoles(["ROLE_USER_PARTENAIRE"]);
+            $user->setProfil('USER PARTENAIRE');
+
+            $data = [
+                'Status' => 201,
+                'Message' => 'User Partenaire créé'
+            ];
+        } 
+
+        $entityManager->persist($user); // mapping
+        $entityManager->flush(); // insertion dans la database
+
+        return new JsonResponse($data, 201);
+    }      
 }
