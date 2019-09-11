@@ -17,6 +17,7 @@ return [
     '_profiler_exception_css' => [['token'], ['_controller' => 'web_profiler.controller.exception::cssAction'], [], [['text', '/exception.css'], ['variable', '/', '[^/]++', 'token', true], ['text', '/_profiler']], [], []],
     'partenaireaddpartenaire' => [[], ['_controller' => 'App\\Controller\\PartenaireController::addpartenaire'], [], [['text', '/partenaire/addpartenaire']], [], []],
     'partenaireadduserpartenaire' => [[], ['_controller' => 'App\\Controller\\PartenaireController::adduserpartenaire'], [], [['text', '/partenaire/adduserpartenaire']], [], []],
+    'partenaireaddcompte' => [['id'], ['_controller' => 'App\\Controller\\PartenaireController::addcompte'], [], [['variable', '/', '[^/]++', 'id', true], ['text', '/partenaire/addcompte']], [], []],
     'systeme' => [[], ['_controller' => 'App\\Controller\\SystemeController::index'], [], [['text', '/systeme']], [], []],
     'addusersysteme' => [[], ['_controller' => 'App\\Controller\\SystemeController::addusersystem'], [], [['text', '/addusersysteme']], [], []],
     'login' => [[], ['_controller' => 'App\\Controller\\SystemeController::login'], [], [['text', '/login']], [], []],

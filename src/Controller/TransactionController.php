@@ -36,15 +36,14 @@ class TransactionController extends AbstractController
      */
     public function depot(Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, SerializerInterface $serializer)
     {
-        $a = $this->getUser()->getId();
-        $caissier = $userRepository->find($a); // transformer idcaissier en objet
+        $idcaissier = $this->getUser(); // recurération des infos du caissier connecté
         
         $depot = new Depot();
         $form = $this->createForm(DepotFormType::class, $depot); //les champs du formulaire
         $datapostman = $request->request->all(); // recupérer les données saisies sur postman
         $form->submit($datapostman); // mettre les données saisies de postman dans le formulaire
         $depot->setDate(new \DateTime());
-        $depot->setCaissier($caissier);
+        $depot->setCaissier($idcaissier);
         $montant = $depot->getMontant(); // permet d'obtenir le montant saisi sur postman
         if($montant < 75000){
             

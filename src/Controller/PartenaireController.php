@@ -7,6 +7,7 @@ use App\Entity\Compte;
 use App\Entity\Partenaire;
 use App\Form\UserFormType;
 use App\Form\PartenaireFormType;
+use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -72,9 +73,8 @@ class PartenaireController extends AbstractController
      */
     public function adduserpartenaire(Request $request, EntityManagerInterface $entityManager, UserPasswordEncoderInterface $passwordEncoder, SerializerInterface $serializer)
     {
-        $a = $this->getUser()->getPartenaire()->getId(); //recuperation de l'id du partenaire de l'admin qui s'est connecté
-        $partenaire = $this->getDoctrine()->getRepository(Partenaire::class)->find($a); // transformer idcreateur en objet
-
+        $idpartenaire = $this->getUser()->getPartenaire(); //recuperation de l'id du partenaire de l'admin qui s'est connecté
+        
         $user = new User();
         $form = $this->createForm(UserFormType::class, $user); //les champs du formulaire
         $datapostman = $request->request->all(); // recupérer les données saisies sur postman
@@ -83,12 +83,12 @@ class PartenaireController extends AbstractController
         $encodpassword = $passwordEncoder->encodePassword($user, $password); // encodage du password aprés recupération des données du user
         $user->setPassword($encodpassword); // Repasser le password 
         $user->setStatus('Actif');
-        $user->setPartenaire($partenaire);
+        $user->setPartenaire($idpartenaire);
         $profil = $datapostman['profil']; // recuperation du profil à partir des données saisies sur postman
 
-        if ($profil == 1) {
-            $user->setRoles(["ROLE_ADMIN_PARTENAIRE"]); // le champs Role
-            $user->setProfil('ADMIN PARTENAIRE'); // le champs profil
+        if ($profil == 1){
+            $user->setRoles(["ROLE_ADMIN_PARTENAIRE"]);
+            $user->setProfil('USER ADMIN PARTENAIRE');
 
             $data = [
                 'Status' => 201,
@@ -110,5 +110,29 @@ class PartenaireController extends AbstractController
         $entityManager->flush(); // insertion dans la database
 
         return new JsonResponse($data, 201);
-    }      
+    }
+
+    /**
+     * @Route("/addcompte/{id}", name="addcompte", methods={"POST"})
+     */
+    public function addcompte(Partenaire $partenaire,Request $request, EntityManagerInterface $entityManager, UserRepository $userRepository, SerializerInterface $serializer)
+    {
+        $idcreateur = $this->getUser(); //recuperation de l'id du créateur
+        
+        $compte = new Compte();
+        $ncompte = date('y') . date('m') . date('d') . date('H') . date('i') . date('s');
+        $compte->setNumero($ncompte);
+        $compte->setMontant(0);
+        $compte->setPartenaire($partenaire); // id du partenaire pour le compte
+        $compte->setCreateur($idcreateur); // id du admin créateur pour le compte
+
+        $entityManager->persist($compte); // mapping
+        $entityManager->flush(); // insertion dans la database
+
+        $data = [
+            'Status' => 201,
+            'Message' => 'Compte créé'
+        ];
+        return new JsonResponse($data, 201);
+    }
 }
